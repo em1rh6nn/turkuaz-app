@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turkuaz - Haftalık Program ve Takvim Sistemi</title>
+    <title>Turkuaz - Bir Tür Takvim</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.0/html2canvas.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -75,7 +77,6 @@
             </div>
             
             <div class="flex items-center gap-3 flex-wrap justify-center">
-                
                 <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition" title="Temayı Değiştir">
                     <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
                 </button>
@@ -103,7 +104,6 @@
         <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 h-full">
             
             <div class="xl:col-span-3 flex flex-col h-full min-h-0 relative">
-                
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs flex flex-col h-full min-h-0 pb-[72px] transition-colors duration-300">
                     <div class="flex justify-between items-center mb-4 shrink-0">
                         <div class="flex items-center gap-2">
@@ -127,14 +127,12 @@
                         <div class="grid grid-cols-7 text-center text-sm font-semibold text-slate-400 dark:text-slate-500 mb-2">
                             <div>Pt</div><div>Sa</div><div>Ça</div><div>Pe</div><div>Cu</div><div>Ct</div><div>Pz</div>
                         </div>
-                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm">
-                            </div>
+                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm"></div>
                     </div>
 
                     <div class="border-t border-slate-100 dark:border-slate-700 pt-4 flex-1 flex flex-col min-h-0">
                         <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Seçilen Aydaki Önemli Tarihler</h3>
-                        <div id="important-dates-list" class="space-y-3 overflow-y-auto flex-1 pr-2 min-h-0">
-                            </div>
+                        <div id="important-dates-list" class="space-y-3 overflow-y-auto flex-1 pr-2 min-h-0"></div>
                     </div>
                 </div>
 
@@ -155,7 +153,6 @@
                             <div class="mb-4 bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 w-full overflow-hidden shrink-0">
                                 <div id="todo-progress-bar" class="bg-turquoise-500 h-2.5 rounded-full w-0 transition-all duration-500 ease-out"></div>
                             </div>
-
                             <form onsubmit="addTodoItem(event)" class="flex gap-2 mb-4 shrink-0">
                                 <input type="text" id="todo-input" placeholder="Yeni görev ekle..." required
                                        class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
@@ -163,13 +160,10 @@
                                     <i class="fa-solid fa-plus"></i>
                                 </button>
                             </form>
-
-                            <div id="todo-items-container" class="space-y-3 overflow-y-auto flex-1 pr-2">
-                                </div>
+                            <div id="todo-items-container" class="space-y-3 overflow-y-auto flex-1 pr-2"></div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="xl:col-span-9 h-full flex flex-col min-h-0">
@@ -197,7 +191,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="1">
                             <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
                                 <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Salı</span>
@@ -207,7 +200,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="2">
                             <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
                                 <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Çarşamba</span>
@@ -217,7 +209,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="3">
                             <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
                                 <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Perşembe</span>
@@ -227,7 +218,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="4">
                             <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
                                 <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Cuma</span>
@@ -237,7 +227,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-turquoise-50/30 dark:bg-turquoise-900/20 rounded-xl border border-turquoise-100/60 dark:border-turquoise-800/50 p-3 min-h-0" data-day="5">
                             <div class="text-center pb-3 border-b border-turquoise-200/60 dark:border-turquoise-800/50 mb-3 shrink-0">
                                 <span class="block font-bold text-turquoise-800 dark:text-turquoise-400 text-sm">Cumartesi</span>
@@ -247,7 +236,6 @@
                                 <i class="fa-solid fa-plus"></i> Ekle
                             </button>
                         </div>
-
                         <div class="day-column flex flex-col bg-turquoise-50/30 dark:bg-turquoise-900/20 rounded-xl border border-turquoise-100/60 dark:border-turquoise-800/50 p-3 min-h-0" data-day="6">
                             <div class="text-center pb-3 border-b border-turquoise-200/60 dark:border-turquoise-800/50 mb-3 shrink-0">
                                 <span class="block font-bold text-turquoise-800 dark:text-turquoise-400 text-sm">Pazar</span>
@@ -326,7 +314,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Kendi Firebase Config Dosyanız
         const firebaseConfig = {
             apiKey: "AIzaSyByga5HSKMq7ohPJHPz0gFeWllfQ1ApyE4",
             authDomain: "turkuaz-3e1ea.firebaseapp.com",
@@ -336,26 +323,22 @@
             appId: "1:1083804080928:web:fc08d6c6b7820891075545"
         };
 
-        // Firebase Başlatma
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
         let currentUser = null;
 
-        // Oturum Durumu İzleyicisi (Giriş yapılmış mı kontrolü)
         onAuthStateChanged(auth, (user) => {
             const syncBtnContent = document.getElementById("sync-btn-content");
             if (user) {
                 currentUser = user;
-                // Kullanıcı giriş yaptıysa profil fotoğrafı ve ismini göster
                 syncBtnContent.innerHTML = `
                     <img src="${user.photoURL || 'https://via.placeholder.com/150'}" class="w-6 h-6 rounded-full border border-blue-400" referrerpolicy="no-referrer">
                     <span class="truncate max-w-[120px] font-bold">${user.displayName.split(' ')[0]} (Çıkış)</span>
                 `;
             } else {
                 currentUser = null;
-                // Kullanıcı çıkış yaptıysa eski buton halini göster
                 syncBtnContent.innerHTML = `
                     <i class="fa-brands fa-google text-lg"></i>
                     <span>Google ile Giriş Yap</span>
@@ -363,20 +346,13 @@
             }
         });
 
-        // Global Giriş / Çıkış Buton Tetikleyicisi
         window.handleAuthAction = function() {
             if (currentUser) {
                 if (confirm("Hesabınızdan çıkış yapmak istiyor musunuz?")) {
-                    signOut(auth).then(() => {
-                        console.log("Güvenli çıkış yapıldı.");
-                    }).catch(err => console.error("Çıkış Hatası:", err));
+                    signOut(auth).catch(err => console.error("Çıkış Hatası:", err));
                 }
             } else {
-                // Pop-up pencere ile Google Girişi
                 signInWithPopup(auth, googleProvider)
-                .then((result) => {
-                    console.log(`Başarıyla giriş yapıldı: ${result.user.displayName}`);
-                })
                 .catch((error) => {
                     console.error("Giriş Hatası:", error);
                     alert("Giriş esnasında bir sorun oluştu. Detay: " + error.message);
@@ -386,7 +362,6 @@
     </script>
 
     <script>
-        // State Management
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         
@@ -402,7 +377,6 @@
         };
 
         window.addEventListener("DOMContentLoaded", () => {
-            // Kayıtlı Tema Kontrolü
             const savedTheme = localStorage.getItem('turkuaz_theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -418,7 +392,6 @@
             document.getElementById('live-date-string').innerText = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
         });
 
-        // TEMA DEĞİŞTİRME MOTORU
         function toggleTheme() {
             const htmlClasses = document.documentElement.classList;
             const icon = document.getElementById('theme-icon');
@@ -461,7 +434,6 @@
             }
         }
 
-        // --- TAKVİM KISMI ---
         function renderCalendar() {
             document.getElementById("current-month-name").innerText = `${monthNames[currentMonth]} ${currentYear}`;
             document.getElementById("active-year-badge").innerText = currentYear;
@@ -506,7 +478,6 @@
 
                 daysGrid.appendChild(dayCell);
             }
-
             renderImportantDatesList();
         }
 
@@ -572,7 +543,6 @@
             }
         }
 
-        // --- GÖREV WIDGET KISMI ---
         function renderTodos() {
             const container = document.getElementById("todo-items-container");
             container.innerHTML = "";
@@ -649,7 +619,6 @@
             }
         }
 
-        // --- HAFTALIK MATRİS ---
         function renderWeeklyMatrix() {
             for (let day = 0; day <= 6; day++) {
                 const column = document.querySelector(`.day-column[data-day="${day}"] .events-slot`);
@@ -725,7 +694,7 @@
             }
         }
 
-        // --- PNG EXPORT ---
+        // --- MÜKEMMEL PNG EXPORT (TEMA UYUMLU, KLON YÖNTEMİ) ---
         function exportPlannerAsPNG() {
             const btn = document.getElementById("png-download-btn");
             const originalText = btn.innerHTML;
