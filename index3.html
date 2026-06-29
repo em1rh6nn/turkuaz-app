@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkuaz - Haftalık Program ve Takvim Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.0/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        turquoise: {
+                            50: '#ecfeff',
+                            100: '#cffafe',
+                            200: '#a5f3fc',
+                            300: '#67e8f9',
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            700: '#0e7490',
+                            800: '#155e75',
+                            900: '#164e63',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 h-screen flex flex-col overflow-hidden relative transition-colors duration-300">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shrink-0 z-40 shadow-xs transition-colors duration-300">
+        <div class="max-w-[1600px] mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-turquoise-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-turquoise-500/20">
+                    <i class="fa-solid fa-calendar-check text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Turkuaz</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Dinamik Haftalık Program ve Takvim Yönetimi</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 flex-wrap justify-center">
+                
+                <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition" title="Temayı Değiştir">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+
+                <button id="sync-btn" onclick="handleAuthAction()" class="flex items-center gap-2 h-10 px-4 border border-slate-200 dark:border-slate-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition font-medium text-sm shadow-sm" title="Google Girişi ve Bulut Yedekleme">
+                    <span id="sync-btn-content" class="flex items-center gap-2">
+                        <i class="fa-brands fa-google text-lg"></i>
+                        <span>Google ile Giriş Yap</span>
+                    </span>
+                </button>
+
+                <div class="w-px h-6 bg-slate-200 dark:bg-slate-600 mx-1 hidden sm:block"></div>
+
+                <button onclick="clearAllData()" class="px-5 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Verileri Temizle
+                </button>
+                <button id="png-download-btn" onclick="exportPlannerAsPNG()" class="px-6 py-2.5 bg-turquoise-600 hover:bg-turquoise-700 text-white rounded-lg text-sm font-semibold shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-image"></i> PNG İndir
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] w-full mx-auto px-4 py-4 flex-1 flex overflow-hidden">
+        <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 h-full">
+            
+            <div class="xl:col-span-3 flex flex-col h-full min-h-0 relative">
+                
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs flex flex-col h-full min-h-0 pb-[72px] transition-colors duration-300">
+                    <div class="flex justify-between items-center mb-4 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-calendar text-turquoise-600 text-xl"></i>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Takvim</h2>
+                        </div>
+                        <span class="text-sm font-semibold bg-turquoise-50 dark:bg-turquoise-900/30 text-turquoise-700 dark:text-turquoise-400 px-3 py-1 rounded-full" id="active-year-badge">2026</span>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl mb-4 shrink-0">
+                        <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition">
+                            <i class="fa-solid fa-chevron-left text-sm"></i>
+                        </button>
+                        <span id="current-month-name" class="text-base font-bold text-slate-800 dark:text-slate-100">Ocak</span>
+                        <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition">
+                            <i class="fa-solid fa-chevron-right text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-4 shrink-0">
+                        <div class="grid grid-cols-7 text-center text-sm font-semibold text-slate-400 dark:text-slate-500 mb-2">
+                            <div>Pt</div><div>Sa</div><div>Ça</div><div>Pe</div><div>Cu</div><div>Ct</div><div>Pz</div>
+                        </div>
+                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm">
+                            </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 dark:border-slate-700 pt-4 flex-1 flex flex-col min-h-0">
+                        <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Seçilen Aydaki Önemli Tarihler</h3>
+                        <div id="important-dates-list" class="space-y-3 overflow-y-auto flex-1 pr-2 min-h-0">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-0 left-0 w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-none z-50 flex flex-col overflow-hidden transition-colors duration-300">
+                    <div class="flex items-center justify-between p-4 cursor-pointer bg-turquoise-600 hover:bg-turquoise-700 dark:bg-turquoise-700 dark:hover:bg-turquoise-600 text-white transition" onclick="toggleTodoList()">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-list-check text-xl"></i>
+                            <h2 class="text-base font-bold">Haftalık Görev Listesi</h2>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="todo-count-badge" class="text-xs font-semibold bg-white/20 px-2 py-1 rounded">0/0</span>
+                            <i id="todo-toggle-icon" class="fa-solid fa-chevron-up text-sm transition-transform duration-300"></i>
+                        </div>
+                    </div>
+
+                    <div id="todo-collapsible-content" class="hidden flex-col bg-white dark:bg-slate-800">
+                        <div class="p-4 flex-col flex h-[400px]">
+                            <div class="mb-4 bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 w-full overflow-hidden shrink-0">
+                                <div id="todo-progress-bar" class="bg-turquoise-500 h-2.5 rounded-full w-0 transition-all duration-500 ease-out"></div>
+                            </div>
+
+                            <form onsubmit="addTodoItem(event)" class="flex gap-2 mb-4 shrink-0">
+                                <input type="text" id="todo-input" placeholder="Yeni görev ekle..." required
+                                       class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                                <button type="submit" class="bg-turquoise-600 hover:bg-turquoise-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </form>
+
+                            <div id="todo-items-container" class="space-y-3 overflow-y-auto flex-1 pr-2">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="xl:col-span-9 h-full flex flex-col min-h-0">
+                <div id="weekly-matrix-capture-area" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-xs h-full flex flex-col min-h-0 transition-colors duration-300">
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 dark:border-slate-700 pb-4 mb-5 gap-3 shrink-0">
+                        <div class="flex-1 w-full">
+                            <div class="text-xs font-bold text-turquoise-600 dark:text-turquoise-400 uppercase tracking-widest mb-1">HAFTALIK PROGRAMIM</div>
+                            <input type="text" id="planner-title-input" value="Hareket" 
+                                   class="text-2xl font-bold text-slate-900 dark:text-white bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-600 focus:border-turquoise-500 dark:focus:border-turquoise-500 focus:outline-none px-1 py-1 rounded transition w-full max-w-lg">
+                        </div>
+                        <div class="text-right text-xs text-slate-400 dark:text-slate-500 font-medium sm:block hidden">
+                            <div>Oluşturulma Tarihi</div>
+                            <div id="live-date-string" class="text-sm font-bold text-slate-600 dark:text-slate-300 mt-0.5">Haziran 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-7 gap-4 min-h-0">
+                        <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="0">
+                            <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
+                                <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Pazartesi</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(0)" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-turquoise-600 dark:hover:text-turquoise-400 hover:border-turquoise-400 dark:hover:border-turquoise-500 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="1">
+                            <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
+                                <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Salı</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(1)" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-turquoise-600 dark:hover:text-turquoise-400 hover:border-turquoise-400 dark:hover:border-turquoise-500 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="2">
+                            <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
+                                <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Çarşamba</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(2)" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-turquoise-600 dark:hover:text-turquoise-400 hover:border-turquoise-400 dark:hover:border-turquoise-500 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="3">
+                            <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
+                                <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Perşembe</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(3)" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-turquoise-600 dark:hover:text-turquoise-400 hover:border-turquoise-400 dark:hover:border-turquoise-500 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-slate-50/60 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-700/60 p-3 min-h-0" data-day="4">
+                            <div class="text-center pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3 shrink-0">
+                                <span class="block font-bold text-slate-800 dark:text-slate-200 text-sm">Cuma</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(4)" class="mt-3 w-full py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-turquoise-600 dark:hover:text-turquoise-400 hover:border-turquoise-400 dark:hover:border-turquoise-500 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-turquoise-50/30 dark:bg-turquoise-900/20 rounded-xl border border-turquoise-100/60 dark:border-turquoise-800/50 p-3 min-h-0" data-day="5">
+                            <div class="text-center pb-3 border-b border-turquoise-200/60 dark:border-turquoise-800/50 mb-3 shrink-0">
+                                <span class="block font-bold text-turquoise-800 dark:text-turquoise-400 text-sm">Cumartesi</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(5)" class="mt-3 w-full py-2 border-2 border-dashed border-turquoise-300 dark:border-turquoise-700/80 text-turquoise-600 dark:text-turquoise-500 hover:text-turquoise-700 dark:hover:text-turquoise-400 hover:border-turquoise-400 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+
+                        <div class="day-column flex flex-col bg-turquoise-50/30 dark:bg-turquoise-900/20 rounded-xl border border-turquoise-100/60 dark:border-turquoise-800/50 p-3 min-h-0" data-day="6">
+                            <div class="text-center pb-3 border-b border-turquoise-200/60 dark:border-turquoise-800/50 mb-3 shrink-0">
+                                <span class="block font-bold text-turquoise-800 dark:text-turquoise-400 text-sm">Pazar</span>
+                            </div>
+                            <div class="events-slot space-y-3 flex-1 overflow-y-auto pr-1"></div>
+                            <button onclick="openAddEventModal(6)" class="mt-3 w-full py-2 border-2 border-dashed border-turquoise-300 dark:border-turquoise-700/80 text-turquoise-600 dark:text-turquoise-500 hover:text-turquoise-700 dark:hover:text-turquoise-400 hover:border-turquoise-400 bg-white/50 dark:bg-slate-800/50 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-plus"></i> Ekle
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="event-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-md shadow-xl m-4 transform scale-95 transition-transform duration-200" id="modal-card">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-turquoise-600 dark:text-turquoise-400"></i> Etkinlik Planla
+                </h3>
+                <button onclick="closeEventModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form onsubmit="saveEventItem(event)" class="space-y-5">
+                <input type="hidden" id="modal-day-index">
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">Saat / Zaman Dilimi</label>
+                    <input type="text" id="event-time" placeholder="Örn: 09:00 - 10:30, Akşam veya Tüm Gün" required
+                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">Etkinlik Başlığı</label>
+                    <input type="text" id="event-title" placeholder="Örn: Web Geliştirme, Toplantı, Spor" required
+                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">Renk Teması</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="turquoise" checked class="sr-only peer">
+                            <div class="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-turquoise-600 peer-checked:bg-turquoise-50 dark:peer-checked:bg-turquoise-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-turquoise-800 dark:peer-checked:text-turquoise-300 text-xs font-bold transition">Turkuaz</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="amber" class="sr-only peer">
+                            <div class="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-amber-600 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-amber-800 dark:peer-checked:text-amber-300 text-xs font-bold transition">Sarı</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="rose" class="sr-only peer">
+                            <div class="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-rose-600 peer-checked:bg-rose-50 dark:peer-checked:bg-rose-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-rose-800 dark:peer-checked:text-rose-300 text-xs font-bold transition">Pembe</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="indigo" class="sr-only peer">
+                            <div class="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-indigo-800 dark:peer-checked:text-indigo-300 text-xs font-bold transition">Mavi</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="emerald" class="sr-only peer">
+                            <div class="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 text-xs font-bold transition">Yeşil</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-3">
+                    <button type="button" onclick="closeEventModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg text-sm font-bold transition">İptal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-turquoise-600 hover:bg-turquoise-700 text-white rounded-lg text-sm font-bold shadow-xs transition">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Kendi Firebase Config Dosyanız
+        const firebaseConfig = {
+            apiKey: "AIzaSyByga5HSKMq7ohPJHPz0gFeWllfQ1ApyE4",
+            authDomain: "turkuaz-3e1ea.firebaseapp.com",
+            projectId: "turkuaz-3e1ea",
+            storageBucket: "turkuaz-3e1ea.firebasestorage.app",
+            messagingSenderId: "1083804080928",
+            appId: "1:1083804080928:web:fc08d6c6b7820891075545"
+        };
+
+        // Firebase Başlatma
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+        
+        let currentUser = null;
+
+        // Oturum Durumu İzleyicisi (Giriş yapılmış mı kontrolü)
+        onAuthStateChanged(auth, (user) => {
+            const syncBtnContent = document.getElementById("sync-btn-content");
+            if (user) {
+                currentUser = user;
+                // Kullanıcı giriş yaptıysa profil fotoğrafı ve ismini göster
+                syncBtnContent.innerHTML = `
+                    <img src="${user.photoURL || 'https://via.placeholder.com/150'}" class="w-6 h-6 rounded-full border border-blue-400" referrerpolicy="no-referrer">
+                    <span class="truncate max-w-[120px] font-bold">${user.displayName.split(' ')[0]} (Çıkış)</span>
+                `;
+            } else {
+                currentUser = null;
+                // Kullanıcı çıkış yaptıysa eski buton halini göster
+                syncBtnContent.innerHTML = `
+                    <i class="fa-brands fa-google text-lg"></i>
+                    <span>Google ile Giriş Yap</span>
+                `;
+            }
+        });
+
+        // Global Giriş / Çıkış Buton Tetikleyicisi
+        window.handleAuthAction = function() {
+            if (currentUser) {
+                if (confirm("Hesabınızdan çıkış yapmak istiyor musunuz?")) {
+                    signOut(auth).then(() => {
+                        console.log("Güvenli çıkış yapıldı.");
+                    }).catch(err => console.error("Çıkış Hatası:", err));
+                }
+            } else {
+                // Pop-up pencere ile Google Girişi
+                signInWithPopup(auth, googleProvider)
+                .then((result) => {
+                    console.log(`Başarıyla giriş yapıldı: ${result.user.displayName}`);
+                })
+                .catch((error) => {
+                    console.error("Giriş Hatası:", error);
+                    alert("Giriş esnasında bir sorun oluştu. Detay: " + error.message);
+                });
+            }
+        }
+    </script>
+
+    <script>
+        // State Management
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        
+        const monthNames = [
+            "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", 
+            "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+        ];
+
+        let appData = {
+            weeklyEvents: {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []},
+            todoItems: [],
+            importantDates: {} 
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            // Kayıtlı Tema Kontrolü
+            const savedTheme = localStorage.getItem('turkuaz_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+            }
+
+            loadDataFromLocalStorage();
+            renderCalendar();
+            renderTodos();
+            renderWeeklyMatrix();
+            
+            const now = new Date();
+            document.getElementById('live-date-string').innerText = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+        });
+
+        // TEMA DEĞİŞTİRME MOTORU
+        function toggleTheme() {
+            const htmlClasses = document.documentElement.classList;
+            const icon = document.getElementById('theme-icon');
+            if (htmlClasses.contains('dark')) {
+                htmlClasses.remove('dark');
+                localStorage.setItem('turkuaz_theme', 'light');
+                icon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                htmlClasses.add('dark');
+                localStorage.setItem('turkuaz_theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem("turkuaz_planner_data", JSON.stringify(appData));
+        }
+
+        function loadDataFromLocalStorage() {
+            const saved = localStorage.getItem("turkuaz_planner_data");
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                    if (!appData.weeklyEvents) appData.weeklyEvents = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+                    if (!appData.todoItems) appData.todoItems = [];
+                    if (!appData.importantDates) appData.importantDates = {};
+                } catch (e) {
+                    console.error("Local storage hatası", e);
+                }
+            }
+        }
+
+        function clearAllData() {
+            if (confirm("Tüm haftalık programı, görevleri ve tarihleri sıfırlamak istediğinize emin misiniz?")) {
+                localStorage.removeItem("turkuaz_planner_data");
+                appData = {weeklyEvents: {0:[],1:[],2:[],3:[],4:[],5:[],6:[]}, todoItems: [], importantDates: {}};
+                renderCalendar();
+                renderTodos();
+                renderWeeklyMatrix();
+            }
+        }
+
+        // --- TAKVİM KISMI ---
+        function renderCalendar() {
+            document.getElementById("current-month-name").innerText = `${monthNames[currentMonth]} ${currentYear}`;
+            document.getElementById("active-year-badge").innerText = currentYear;
+            
+            const daysGrid = document.getElementById("calendar-days-grid");
+            daysGrid.innerHTML = "";
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < adjustedFirstDay; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.className = "py-2";
+                daysGrid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isImportant = appData.importantDates[dayStr] ? true : false;
+
+                const dayCell = document.createElement("button");
+                dayCell.type = "button";
+                dayCell.onclick = () => promptImportantDate(dayStr, day);
+                
+                let baseStyle = "py-2 text-sm font-semibold rounded-lg relative flex flex-col items-center justify-center transition hover:bg-slate-100 dark:hover:bg-slate-700 ";
+                
+                if (isImportant) {
+                    baseStyle += "bg-turquoise-50 dark:bg-turquoise-900/30 text-turquoise-700 dark:text-turquoise-400 font-bold border border-turquoise-200 dark:border-turquoise-700 shadow-sm";
+                } else {
+                    baseStyle += "text-slate-700 dark:text-slate-300";
+                }
+
+                dayCell.className = baseStyle;
+                dayCell.innerHTML = `<span>${day}</span>`;
+                
+                if (isImportant) {
+                    const dot = document.createElement("span");
+                    dot.className = "absolute bottom-1 w-1.5 h-1.5 bg-turquoise-600 dark:bg-turquoise-400 rounded-full";
+                    dayCell.appendChild(dot);
+                }
+
+                daysGrid.appendChild(dayCell);
+            }
+
+            renderImportantDatesList();
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function promptImportantDate(dateStr, dayNum) {
+            const currentVal = appData.importantDates[dateStr] || "";
+            const msg = `${dayNum} ${monthNames[currentMonth]} ${currentYear} için önemli bir not girin (Silmek için boş bırakın):`;
+            const userNote = prompt(msg, currentVal);
+            if (userNote === null) return;
+            if (userNote.trim() === "") delete appData.importantDates[dateStr];
+            else appData.importantDates[dateStr] = userNote.trim();
+            saveDataToLocalStorage();
+            renderCalendar();
+        }
+
+        function renderImportantDatesList() {
+            const listContainer = document.getElementById("important-dates-list");
+            listContainer.innerHTML = "";
+            const activeMonthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+            const relevantDates = Object.keys(appData.importantDates).filter(date => date.startsWith(activeMonthPrefix)).sort();
+
+            if (relevantDates.length === 0) {
+                listContainer.innerHTML = `<div class="text-sm text-slate-400 dark:text-slate-500 italic py-4 text-center">Bu ay eklenmiş tarih yok.</div>`;
+                return;
+            }
+
+            relevantDates.forEach(date => {
+                const day = parseInt(date.split("-")[2]);
+                const note = appData.importantDates[date];
+                const item = document.createElement("div");
+                item.className = "flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition min-w-0 shadow-sm";
+                item.innerHTML = `
+                    <div class="flex items-start gap-3 flex-1 min-w-0 cursor-pointer" onclick="promptImportantDate('${date}', ${day})">
+                        <span class="font-bold bg-white dark:bg-slate-800 text-turquoise-700 dark:text-turquoise-400 border border-turquoise-200 dark:border-turquoise-700/50 w-7 h-7 rounded-md flex items-center justify-center shrink-0 shadow-sm text-sm">${day}</span>
+                        <span class="text-slate-700 dark:text-slate-200 font-medium pt-0.5 flex-1 break-words leading-snug text-sm">${note}</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0 ml-auto">
+                        <button onclick="deleteImportantDate('${date}')" class="text-slate-400 hover:text-rose-500 transition p-2 text-sm" title="Sil">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function deleteImportantDate(dateStr) {
+            if (confirm("Bu tarihi silmek istiyor musunuz?")) {
+                delete appData.importantDates[dateStr];
+                saveDataToLocalStorage();
+                renderCalendar();
+            }
+        }
+
+        // --- GÖREV WIDGET KISMI ---
+        function renderTodos() {
+            const container = document.getElementById("todo-items-container");
+            container.innerHTML = "";
+            let completedCount = 0;
+            const totalCount = appData.todoItems.length;
+
+            if (totalCount === 0) {
+                container.innerHTML = `<div class="text-sm text-slate-400 dark:text-slate-500 italic py-6 text-center">Planlanmış görev yok.</div>`;
+            } else {
+                appData.todoItems.forEach((todo, index) => {
+                    if (todo.completed) completedCount++;
+                    const todoRow = document.createElement("div");
+                    
+                    const classesCompleted = "bg-slate-50/80 dark:bg-slate-900/30 border-slate-200/60 dark:border-slate-700/50";
+                    const classesActive = "bg-white dark:bg-slate-700/30 border-slate-200 dark:border-slate-600 hover:border-turquoise-300 dark:hover:border-turquoise-500 shadow-sm";
+                    
+                    todoRow.className = `flex items-center justify-between p-3 rounded-xl border transition group ${todo.completed ? classesCompleted : classesActive}`;
+                    todoRow.innerHTML = `
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <input type="checkbox" ${todo.completed ? 'checked' : ''} onclick="toggleTodoStatus(${index})"
+                                   class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-turquoise-600 focus:ring-turquoise-500 accent-turquoise-600 shrink-0 cursor-pointer">
+                            <span class="text-sm font-medium ${todo.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${todo.text}</span>
+                        </div>
+                        <button onclick="deleteTodoItem(${index})" class="text-slate-300 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 transition ml-2 opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    container.appendChild(todoRow);
+                });
+            }
+            updateProgressBar(completedCount, totalCount);
+        }
+
+        function addTodoItem(e) {
+            e.preventDefault();
+            const input = document.getElementById("todo-input");
+            const text = input.value.trim();
+            if (!text) return;
+            appData.todoItems.push({ text: text, completed: false });
+            input.value = "";
+            saveDataToLocalStorage();
+            renderTodos();
+        }
+
+        function toggleTodoStatus(index) {
+            appData.todoItems[index].completed = !appData.todoItems[index].completed;
+            saveDataToLocalStorage();
+            renderTodos();
+        }
+
+        function deleteTodoItem(index) {
+            appData.todoItems.splice(index, 1);
+            saveDataToLocalStorage();
+            renderTodos();
+        }
+
+        function updateProgressBar(completed, total) {
+            document.getElementById("todo-count-badge").innerText = `${completed}/${total}`;
+            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+            document.getElementById("todo-progress-bar").style.width = `${percentage}%`;
+        }
+
+        function toggleTodoList() {
+            const content = document.getElementById("todo-collapsible-content");
+            const icon = document.getElementById("todo-toggle-icon");
+            if (content.classList.contains("hidden")) {
+                content.classList.remove("hidden");
+                content.classList.add("flex");
+                icon.classList.add("rotate-180");
+            } else {
+                content.classList.add("hidden");
+                content.classList.remove("flex");
+                icon.classList.remove("rotate-180");
+            }
+        }
+
+        // --- HAFTALIK MATRİS ---
+        function renderWeeklyMatrix() {
+            for (let day = 0; day <= 6; day++) {
+                const column = document.querySelector(`.day-column[data-day="${day}"] .events-slot`);
+                if (!column) continue;
+                column.innerHTML = "";
+                const events = appData.weeklyEvents[day] || [];
+                if (events.length === 0) {
+                    column.innerHTML = `<div class="text-xs font-medium text-slate-300 dark:text-slate-600 italic text-center py-6 border-2 border-dashed border-slate-200/50 dark:border-slate-700/50 rounded-lg">Etkinlik Yok</div>`;
+                    continue;
+                }
+                events.sort((a, b) => a.time.localeCompare(b.time));
+                events.forEach((ev, evIndex) => {
+                    const card = document.createElement("div");
+                    
+                    let colorClasses = "bg-turquoise-50 dark:bg-turquoise-900/30 border-turquoise-200 dark:border-turquoise-800 text-turquoise-800 dark:text-turquoise-200";
+                    if (ev.color === "amber") colorClasses = "bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200";
+                    if (ev.color === "rose") colorClasses = "bg-rose-50 dark:bg-rose-900/30 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200";
+                    if (ev.color === "indigo") colorClasses = "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200";
+                    if (ev.color === "emerald") colorClasses = "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200";
+
+                    card.className = `p-2.5 rounded-xl border shadow-sm relative group transition-all hover:shadow-md ${colorClasses}`;
+                    card.innerHTML = `
+                        <div class="text-xs font-bold opacity-80 mb-1 flex items-center gap-1.5">
+                            <i class="fa-regular fa-clock"></i> ${ev.time}
+                        </div>
+                        <div class="text-sm font-bold leading-snug break-words pr-4">${ev.title}</div>
+                        <button onclick="deleteWeeklyEvent(${day}, ${evIndex})" class="absolute top-1.5 right-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition p-1">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    `;
+                    column.appendChild(card);
+                });
+            }
+        }
+
+        function openAddEventModal(dayIndex) {
+            document.getElementById("modal-day-index").value = dayIndex;
+            document.getElementById("event-time").value = "";
+            document.getElementById("event-title").value = "";
+            const modal = document.getElementById("event-modal");
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modal.classList.remove("opacity-0");
+                document.getElementById("modal-card").classList.remove("scale-95");
+            }, 10);
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById("event-modal");
+            modal.classList.add("opacity-0");
+            document.getElementById("modal-card").classList.add("scale-95");
+            setTimeout(() => { modal.classList.add("hidden"); }, 200);
+        }
+
+        function saveEventItem(e) {
+            e.preventDefault();
+            const dayIndex = parseInt(document.getElementById("modal-day-index").value);
+            const time = document.getElementById("event-time").value.trim();
+            const title = document.getElementById("event-title").value.trim();
+            const color = document.querySelector('input[name="event-color"]:checked').value;
+            if (!appData.weeklyEvents[dayIndex]) appData.weeklyEvents[dayIndex] = [];
+            appData.weeklyEvents[dayIndex].push({ time, title, color });
+            saveDataToLocalStorage();
+            renderWeeklyMatrix();
+            closeEventModal();
+        }
+
+        function deleteWeeklyEvent(dayIndex, evIndex) {
+            if (appData.weeklyEvents[dayIndex]) {
+                appData.weeklyEvents[dayIndex].splice(evIndex, 1);
+                saveDataToLocalStorage();
+                renderWeeklyMatrix();
+            }
+        }
+
+        // --- PNG EXPORT ---
+        function exportPlannerAsPNG() {
+            const btn = document.getElementById("png-download-btn");
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İndiriliyor...';
+            btn.disabled = true;
+
+            const originalElement = document.getElementById("weekly-matrix-capture-area");
+            const plannerTitle = document.getElementById("planner-title-input").value.trim() || "Haftalik_Plan";
+            const sanitizedFilename = plannerTitle.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".png";
+
+            const clone = originalElement.cloneNode(true);
+            document.body.appendChild(clone);
+            
+            clone.style.position = "absolute";
+            clone.style.top = "-9999px";
+            clone.style.left = "-9999px";
+            clone.style.width = "1400px"; 
+            clone.style.height = "auto";
+            clone.style.overflow = "visible";
+            
+            const dayColumns = clone.querySelectorAll('.events-slot');
+            dayColumns.forEach(col => {
+                col.style.overflow = "visible";
+                col.style.maxHeight = "none";
+                col.style.flex = "none";
+            });
+
+            const addBtns = clone.querySelectorAll('button');
+            addBtns.forEach(b => { if(b.innerHTML.includes('Ekle')) b.style.display = 'none'; });
+
+            const isDarkMode = document.documentElement.classList.contains('dark');
+
+            const opt = {
+                scale: 2, 
+                useCORS: true,
+                backgroundColor: isDarkMode ? "#1e293b" : "#ffffff", 
+                logging: false,
+                windowWidth: 1400
+            };
+
+            html2canvas(clone, opt).then(canvas => {
+                document.body.removeChild(clone);
+                const link = document.createElement("a");
+                link.download = sanitizedFilename;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            }).catch(err => {
+                document.body.removeChild(clone);
+                console.error("Görsel hatası:", err);
+                alert("Görsel dönüştürülürken bir hata oluştu.");
+            }).finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
