@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkuaz - Haftalık Program ve Takvim Sistemi</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <meta name="theme-color" content="#06b6d4">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        turquoise: {
+                            50: '#ecfeff', 100: '#cffafe', 200: '#a5f3fc',
+                            300: '#67e8f9', 400: '#22d3ee', 500: '#06b6d4',
+                            600: '#0891b2', 700: '#0e7490', 800: '#155e75', 900: '#164e63',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen xl:h-screen flex flex-col overflow-x-hidden xl:overflow-hidden relative transition-colors duration-300">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shrink-0 z-40 shadow-xs transition-colors duration-300">
+        <div class="max-w-[1600px] mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap lg:flex-nowrap justify-between items-center gap-y-2 gap-x-3">
+            <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 bg-turquoise-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-turquoise-500/20 shrink-0">
+                    <i class="fa-solid fa-calendar-check text-base sm:text-xl"></i>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Turkuaz</h1>
+                    <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 truncate mt-1" data-i18n="subtitle">Dinamik Haftalık Program ve Takvim Yönetimi</p>
+                </div>
+            </div>
+            
+            <div class="hidden xl:flex flex-1 justify-center px-4 min-w-0">
+                <span class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 italic truncate" data-i18n="quote">
+                    "İnsana ancak çalıştığının karşılığı vardır. (Necm, 53/39)"
+                </span>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto lg:ml-0">
+                <button onclick="toggleLang()" id="lang-btn" class="h-8 sm:h-9 px-2.5 sm:px-3 flex items-center justify-center border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition font-bold text-xs" title="Dili Değiştir / Change Language">
+                    EN
+                </button>
+
+                <button onclick="toggleTheme()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition" title="Temayı Değiştir">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xs sm:text-base"></i>
+                </button>
+
+                <button onclick="openProfileDashboard()" class="h-8 sm:h-9 px-2.5 sm:px-3.5 flex items-center gap-1.5 border border-turquoise-200 dark:border-turquoise-800 text-turquoise-700 dark:text-turquoise-300 bg-turquoise-50/70 dark:bg-turquoise-900/20 rounded-lg hover:bg-turquoise-100 dark:hover:bg-turquoise-900/40 transition font-semibold text-xs" title="Başarı profilini aç">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="hidden md:inline" data-i18n="profile">Profil</span>
+                    <span id="header-streak-badge" class="min-w-5 h-5 px-1 rounded-full bg-white dark:bg-slate-800 text-[10px] flex items-center justify-center shadow-xs font-bold">1</span>
+                </button>
+
+                <button id="sync-btn" onclick="handleAuthAction()" class="flex items-center justify-center h-8 sm:h-9 px-2.5 sm:px-3.5 border border-slate-200 dark:border-slate-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition font-medium text-xs shadow-xs" title="Google Girişi ve Bulut Yedekleme">
+                    <span id="sync-btn-content" class="flex items-center gap-1.5">
+                        <i class="fa-brands fa-google text-xs sm:text-sm"></i>
+                        <span class="hidden sm:inline" data-i18n="login">Google ile Giriş Yap</span>
+                    </span>
+                </button>
+
+                <div class="w-px h-5 bg-slate-200 dark:bg-slate-600 mx-0.5 hidden sm:block"></div>
+
+                <button onclick="clearAllData()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 rounded-lg transition shadow-xs" title="Verileri Temizle">
+                    <i class="fa-solid fa-trash-can text-xs sm:text-sm"></i>
+                </button>
+                
+                <button id="png-download-btn" onclick="exportPlannerAsPNG()" class="h-8 sm:h-9 px-2.5 sm:px-4 bg-turquoise-600 hover:bg-turquoise-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-image text-xs"></i>
+                    <span class="hidden sm:inline" data-i18n="download_png">PNG İndir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 flex-1 flex overflow-y-auto xl:overflow-hidden">
+        <div class="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 h-auto xl:h-full">
+            
+            <div class="xl:col-span-3 flex flex-col h-auto xl:h-full xl:min-h-0 relative">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 shadow-xs flex flex-col h-auto xl:h-full xl:min-h-0 pb-4 xl:pb-[70px] transition-colors duration-300">
+                    <div class="flex justify-between items-center mb-3 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-calendar text-turquoise-600 text-lg"></i>
+                            <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white" data-i18n="calendar">Takvim</h2>
+                        </div>
+                        <span class="text-xs font-bold bg-turquoise-50 dark:bg-turquoise-900/30 text-turquoise-700 dark:text-turquoise-400 px-2.5 py-0.5 rounded-full" id="active-year-badge">2026</span>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-xl mb-3 shrink-0">
+                        <button onclick="changeMonth(-1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-xs transition">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <span id="current-month-name" class="text-sm font-bold text-slate-800 dark:text-slate-100">Ocak</span>
+                        <button onclick="changeMonth(1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-xs transition">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-3 shrink-0">
+                        <div id="calendar-days-header" class="grid grid-cols-7 text-center text-xs font-bold text-slate-400 dark:text-slate-500 mb-1.5"></div>
+                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+                    </div>
+
+                    <div class="border-t border-slate-100 dark:border-slate-700 pt-3 flex-1 flex flex-col min-h-0">
+                        <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 shrink-0" data-i18n="important_dates">Önemli Tarihler</h3>
+                        <div id="important-dates-list" class="space-y-2.5 overflow-y-auto flex-1 pr-1.5 max-h-[220px] xl:max-h-none min-h-0"></div>
+                    </div>
+                </div>
+
+                <div class="relative xl:absolute mt-4 xl:mt-0 bottom-0 left-0 w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg dark:shadow-none z-30 flex flex-col overflow-hidden transition-colors duration-300">
+                    <div class="flex items-center justify-between p-3.5 cursor-pointer bg-turquoise-600 hover:bg-turquoise-700 dark:bg-turquoise-700 text-white transition" onclick="toggleTodoList()">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-list-check text-lg"></i>
+                            <h2 class="text-sm font-bold" data-i18n="weekly_todo">Haftalık Görev Listesi</h2>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <span id="todo-count-badge" class="text-[11px] font-bold bg-white/20 px-2 py-0.5 rounded">0/0</span>
+                            <i id="todo-toggle-icon" class="fa-solid fa-chevron-up text-xs transition-transform duration-300"></i>
+                        </div>
+                    </div>
+
+                    <div id="todo-collapsible-content" class="hidden flex-col bg-white dark:bg-slate-800">
+                        <div class="p-4 flex-col flex h-[380px]">
+                            <div class="mb-3 bg-slate-100 dark:bg-slate-700 rounded-full h-2 w-full overflow-hidden shrink-0">
+                                <div id="todo-progress-bar" class="bg-turquoise-500 h-2 rounded-full w-0 transition-all duration-500 ease-out"></div>
+                            </div>
+                            <form onsubmit="handleAddTodoOrPaste(event)" class="flex gap-2 mb-3 shrink-0">
+                                <input type="text" id="todo-input" placeholder="Yeni görev ekle..." required data-i18n="add_todo_placeholder"
+                                       class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                                <button type="submit" id="todo-submit-btn" class="bg-turquoise-600 hover:bg-turquoise-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition min-w-[40px] flex items-center justify-center">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </form>
+                            <div id="todo-items-container" class="space-y-2 overflow-y-auto flex-1 pr-1 min-h-[50px] pb-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-9 h-auto xl:h-full flex flex-col min-h-0">
+                <div id="weekly-matrix-capture-area" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 shadow-xs h-auto xl:h-full flex flex-col min-h-0 transition-colors duration-300">
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 dark:border-slate-700 pb-3 sm:pb-4 mb-4 gap-2 shrink-0">
+                        <div class="flex-1 w-full">
+                            <div class="text-[11px] font-bold text-turquoise-600 dark:text-turquoise-400 uppercase tracking-widest mb-0.5" data-i18n="weekly_program">HAFTALIK PROGRAMIM</div>
+                            <input type="text" id="planner-title-input" value="Hareket" 
+                                   class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-600 focus:border-turquoise-500 focus:outline-none px-1 py-0.5 rounded transition w-full max-w-md">
+                        </div>
+                        <div class="text-left sm:text-right text-xs text-slate-400 dark:text-slate-500 font-medium shrink-0">
+                            <div class="hidden sm:block" data-i18n="creation_date">Oluşturulma Tarihi</div>
+                            <div id="live-date-string" class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 mt-0.5">8 Temmuz 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col md:flex-row gap-4 min-h-0 overflow-hidden">
+                        
+                        <div class="w-full md:w-56 lg:w-64 flex md:flex-col gap-1.5 shrink-0 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 pr-0 md:pr-1 md:h-full" id="day-tabs-container">
+                            <!-- JS Inject -->
+                        </div>
+
+                        <div id="active-day-detail-panel" class="flex-1 bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 p-4 sm:p-5 flex flex-col min-h-[350px] md:min-h-0 min-w-0 transition-colors duration-200">
+                            
+                            <div class="flex items-center justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-3 mb-3 shrink-0">
+                                <div class="flex items-center gap-2">
+                                    <div id="active-day-badge" class="w-8 h-8 rounded-xl bg-turquoise-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                        <i class="fa-regular fa-calendar-days"></i>
+                                    </div>
+                                    <div>
+                                        <h3 id="active-day-heading" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Pazartesi</h3>
+                                        <p id="active-day-sub" class="text-xs text-slate-400 font-medium">Planlanan Etkinlikler</p>
+                                    </div>
+                                </div>
+                                <button id="active-day-add-btn" onclick="handleActiveDayAddOrPaste()" class="px-3 py-1.5 bg-turquoise-600 hover:bg-turquoise-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs min-w-[70px] justify-center">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span class="btn-text">Ekle</span>
+                                </button>
+                            </div>
+
+                            <div class="flex-1 overflow-y-auto pr-1">
+                                <div id="active-day-events-slot" class="events-slot-active space-y-2.5 pb-8">
+                                    <!-- JS Inject -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="profile-modal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[70] hidden opacity-0 transition-opacity duration-200 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+        <div id="profile-panel" class="w-full max-w-5xl h-[92vh] md:h-[88vh] mx-auto bg-slate-50 dark:bg-slate-900 rounded-3xl border border-white/20 dark:border-slate-700 shadow-2xl overflow-hidden transform scale-[0.98] transition-transform duration-200 flex flex-col">
+            
+            <div class="px-5 sm:px-7 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4 shrink-0">
+                <div class="min-w-0">
+                    <div class="text-[11px] font-bold text-turquoise-600 dark:text-turquoise-400 uppercase tracking-widest mb-0.5" data-i18n="profile_center">Kişisel Gelişim Merkezi</div>
+                    <h2 id="profile-title" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate" data-i18n="profile_title">Başarı Profilim</h2>
+                </div>
+                <button onclick="closeProfileDashboard()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition" aria-label="Profili kapat">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <section class="lg:col-span-4 bg-gradient-to-br from-turquoise-600 to-cyan-700 text-white rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between gap-4 mb-4">
+                                <div><p class="text-cyan-100 text-xs font-medium" data-i18n="success_rate">Bugünün başarı oranı</p><p id="profile-date-label" class="text-[11px] text-cyan-200/80 mt-0.5"></p></div>
+                                <i class="fa-solid fa-bullseye text-xl text-white/70"></i>
+                            </div>
+                            <div class="flex justify-center mb-4">
+                                <div id="daily-success-ring" class="profile-ring w-36 h-36 rounded-full p-2.5 shadow-inner" style="--progress:0%">
+                                    <div class="w-full h-full rounded-full bg-cyan-700 flex flex-col items-center justify-center">
+                                        <span id="daily-success-rate" class="text-3xl font-black">0%</span>
+                                        <span id="daily-success-detail" class="text-[11px] text-cyan-100 mt-0.5">0 / 0 görev</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="daily-success-message" class="text-center text-xs text-cyan-50 leading-relaxed font-medium"></p>
+                    </section>
+
+                    <section class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 content-start">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5">
+                            <div class="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center mb-2"><i class="fa-solid fa-fire text-sm"></i></div>
+                            <div id="current-streak-value" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">1 gün</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5" data-i18n="current_streak">Güncel seri</div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5">
+                            <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-500 flex items-center justify-center mb-2"><i class="fa-solid fa-trophy text-sm"></i></div>
+                            <div id="longest-streak-value" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">1 gün</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5" data-i18n="longest_streak">En uzun seri</div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center mb-2"><i class="fa-solid fa-calendar-check text-sm"></i></div>
+                            <div id="total-days-value" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">1 gün</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5" data-i18n="total_usage">Toplam kullanım</div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 flex items-center justify-center mb-2"><i class="fa-solid fa-chart-simple text-sm"></i></div>
+                            <div id="weekly-average-value" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">0%</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5" data-i18n="weekly_avg">7 günlük ortalama</div>
+                        </div>
+
+                        <div class="col-span-2 sm:col-span-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div><h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider" data-i18n="success_graph">Son 7 Günlük Görev Grafiği</h3></div>
+                                <span id="completed-total-label" class="text-[11px] font-bold text-turquoise-700 dark:text-turquoise-300 bg-turquoise-50 dark:bg-turquoise-900/30 px-2 py-0.5 rounded-full"></span>
+                            </div>
+                            <div id="success-chart" class="h-32"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n="trend_chart_title">Haftalık Performans ve İstikrar Trendi</h3>
+                            <p class="text-xs text-slate-400 mt-0.5" data-i18n="trend_chart_sub">Son 4 haftanın başarı marjı ve verimlilik eğrisi</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-turquoise-500"></span>
+                                <span class="text-slate-500 dark:text-slate-400 font-semibold" data-i18n="trend_legend">Haftalık Verim</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full h-52 relative pt-2 pb-4">
+                        <svg id="trend-line-svg" class="w-full h-full overflow-visible" viewBox="0 0 700 180" preserveAspectRatio="none"></svg>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- ETKİNLİK EKLEME MODALI -->
+    <div id="event-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[80] hidden opacity-0 transition-opacity duration-200 px-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6 w-full max-w-md shadow-xl transform scale-95 transition-transform duration-200" id="modal-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-turquoise-600 dark:text-turquoise-400"></i> <span data-i18n="modal_plan">Etkinlik Planla</span>
+                </h3>
+                <button onclick="closeEventModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form onsubmit="saveEventItem(event)" class="space-y-4">
+                <input type="hidden" id="modal-day-index">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5" data-i18n="modal_time">Saat / Zaman Dilimi</label>
+                    <input type="text" id="event-time" placeholder="Örn: 09:00 - 10:30" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5" data-i18n="modal_title">Etkinlik Başlığı</label>
+                    <input type="text" id="event-title" placeholder="Planlanan çalışma veya toplantı..." required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-turquoise-500 transition placeholder-slate-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5" data-i18n="modal_color">Renk Teması</label>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="monochrome" checked class="sr-only peer">
+                            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white dark:peer-checked:border-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-[11px] font-bold transition" data-i18n="c_mono">S/B</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="amber" class="sr-only peer">
+                            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-amber-600 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-amber-800 dark:peer-checked:text-amber-300 text-[11px] font-bold transition" data-i18n="c_amber">Sarı</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="rose" class="sr-only peer">
+                            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-rose-600 peer-checked:bg-rose-50 dark:peer-checked:bg-rose-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-rose-800 dark:peer-checked:text-rose-300 text-[11px] font-bold transition" data-i18n="c_rose">Pembe</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="purple" class="sr-only peer">
+                            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-purple-800 dark:peer-checked:text-purple-300 text-[11px] font-bold transition" data-i18n="c_purple">Mor</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="event-color" value="emerald" class="sr-only peer">
+                            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/40 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 text-[11px] font-bold transition" data-i18n="c_emerald">Yeşil</div>
+                        </label>
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg text-xs font-bold transition" data-i18n="cancel">İptal</button>
+                    <button type="submit" class="px-4 py-2 bg-turquoise-600 hover:bg-turquoise-700 text-white rounded-lg text-xs font-bold shadow-xs transition" data-i18n="save">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
